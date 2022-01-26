@@ -1,10 +1,28 @@
 {
   "users": [
     {
-      "username": "rajesht",
-      "email": "test@masterscoding.com",
-      "address": "chennailo",
-      "id": 1
+      "username": "kiran babu",
+      "email": "kirank@mail.com",
+      "address": "hyd",
+      "id": 3
+    },
+    {
+      "username": "rajesh",
+      "email": "rajesh@masterscoding.com",
+      "address": "hyderabad",
+      "id": 5
+    },
+    {
+      "username": "suryateja",
+      "email": "suryatejathappeta2020@gmail.com",
+      "address": "hyderabad",
+      "id": 6
+    },
+    {
+      "username": "bhanu r",
+      "email": "bhanu@mailc.om",
+      "address": "vizag",
+      "id": 7
     }
   ]
 }

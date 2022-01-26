@@ -4,88 +4,63 @@ import { useForm } from 'react-hook-form'
 
 function Userslist() {
 
+    let { register, handleSubmit, setValue } = useForm()
     let [users, setUsers] = useState([])
-    let [userEditStatus, setUserEditStatus] = useState({
+    let [editUser, setEditUser] = useState({
         status: false,
-        index: '',
-        id: ''
+        id: 0
     })
 
 
-
-    let { register, handleSubmit } = useForm()
-
+    //get users 
     useEffect(() => {
-
-        const fetchUsers = async () => {
-            let response = await axios.get("http://localhost:4000/users")
-            let usersList = response.data;
-            setUsers(usersList)
-        }
-        fetchUsers()
-
-    }, [])
+        getUsers()
+    },
+        []
+    )
 
 
-    //dalete user by id
-    const deleteUserById = async (id, index) => {
+    //get users
+    const getUsers = async () => {
+        let response = await axios.get("http://localhost:4000/users")
+        setUsers(response.data)
+    }
 
+    //delete user
+    const deleteUserById = async (id) => {
         let response = await axios.delete(`http://localhost:4000/users/${id}`)
-
-        if (response.status === 200) {
-
-            //get copy of users
-            let newUsers = [...users]
-            //reove user from the copy
-            newUsers.splice(index, 1)
-            //set the state
-            setUsers(newUsers)
-        }
+        getUsers()
 
     }
 
+    //edit user
+    const editUserById = (userObj) => {
 
-
-    //edit use rby id
-    const editUser = (ind, id, e) => {
-        // console.log("e is ", e);
-        // e.stopPropagation();
-        console.log("edit btn");
-        setUserEditStatus({ ...userEditStatus, status: true, index: ind, id: id })
+        setEditUser({ ...editUser, status: true, id: userObj.id })
+        setValue("username", userObj.username)
+        setValue("email", userObj.email)
+        setValue("address", userObj.address)
     }
 
 
     //save user
-    const saveUser = async (modiFiedUserObj) => {
-        modiFiedUserObj.id = userEditStatus.id;
-        let id = userEditStatus.id;
-        let response = await axios.put(`http://localhost:4000/users/${id}`, modiFiedUserObj)
-
-        if (response.status === 200) {
-
-            setUserEditStatus({ ...userEditStatus, status: false })
-            //get latest data
-            let res = await axios.get('http://localhost:4000/users')
-            let users = res.data;
-            setUsers(users)
-
-        }
-
+    const saveUserById = async (modifiedUser) => {
+        modifiedUser.id = editUser.id
+        let id = modifiedUser.id;
+        let response = await axios.put(`http://localhost:4000/users/${id}`, modifiedUser)
+        setEditUser({ ...editUser, status: false })
+        getUsers()
 
     }
 
-
-
     return (
-        <div className='container text-center mt-4'>
-            <p className="display-3 text-center text-primary">List of users</p>
-
-            <form onSubmit={handleSubmit(saveUser)}>
-
-                {users.length == 0 && <p className='display-5 fw-bold text-danger'>No user found</p>}
-
-                {users.length !== 0 &&
-                    <table className="table mt-3">
+        <div className='text-center mt-5 container'>
+            <p className="display-3 fw-bold text-primary">List of Users</p>
+            {/* empty list */}
+            {users.length === 0 && <p className='text-danger'>No users found</p>}
+            {users.length !== 0 &&
+                <form onSubmit={handleSubmit(saveUserById)}>
+                    <table className="table bg-light">
                         <thead>
                             <tr>
                                 <th>Username</th>
@@ -96,48 +71,32 @@ function Userslist() {
 
                         <tbody>
                             {
-                                users.map((userObj, index) => <tr key={userObj.id}>
-
-
-
-
-
+                                users.map((userObj) => <tr key={userObj.id}>
                                     <td>
-                                        {userEditStatus.status && userEditStatus.index === index ?
-                                            <input type="text" id="" className="form-control" defaultValue={userObj.username} {...register("username")} /> :
-                                            <span>
-                                                {userObj.username}
-                                            </span>
+                                        {editUser.status === true && editUser.id === userObj.id ?
+                                            <input type="text" id="" {...register("username")}  /> : <> {userObj.username}</>
                                         }
-                                    </td>
 
+
+                                    </td>
                                     <td>
-                                        {userEditStatus.status && userEditStatus.index === index ?
-                                            <input type="email" id="" className="form-control" defaultValue={userObj.email} {...register("email")} /> :
-                                            <span>
-                                                {userObj.email}
-                                            </span>
+                                        {editUser.status === true && editUser.id === userObj.id ?
+                                            <input type="text" id="" {...register("email")} /> : <> {userObj.email}</>
                                         }
                                     </td>
                                     <td>
-                                        {userEditStatus.status && userEditStatus.index === index ?
-                                            <input type="text" id="" className="form-control" defaultValue={userObj.address} {...register("address")} /> :
-                                            <span>
-                                                {userObj.address}
-                                            </span>
+                                        {editUser.status === true && editUser.id === userObj.id ?
+                                            <input type="text" id="" {...register("address")} /> : <> {userObj.address}</>
                                         }
                                     </td>
                                     <td>
+                                        {editUser.status === true && editUser.id === userObj.id ?
 
 
-                                    </td>
-                                    <td>
-                                        {userEditStatus.status && userEditStatus.index === index ?
-                                            <input className="btn btn-success" type="submit" id="x" value="save" />
-                                            :
+                                            <input type="submit" className="btn btn-success" value="Save" /> :
                                             <>
-                                                <button id="y" type="button" className="btn btn-warning me-3" onClick={(e) => editUser(index, userObj.id, e)} >Edit</button>
-                                                <button type="button" className="btn btn-danger" onClick={() => deleteUserById(userObj.id, index)}>X</button>
+                                                <button type="button" className="btn btn-warning m-1" onClick={() => editUserById(userObj)}>Edit</button>
+                                                <button type="button" className="btn btn-danger m-1" onClick={() => deleteUserById(userObj.id)}>x</button>
                                             </>
                                         }
 
@@ -147,8 +106,11 @@ function Userslist() {
                             }
                         </tbody>
                     </table>
-                }
-            </form>
+                </form>
+
+
+            }
+
         </div>
     )
 }
